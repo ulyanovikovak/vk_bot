@@ -3,9 +3,9 @@ package bot
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
+	"vk_bot/logger"
 	"vk_bot/poll"
 )
 
@@ -19,13 +19,13 @@ func Handler(service *poll.PollService) http.HandlerFunc {
 
 		text := r.FormValue("text")
 		userID := r.FormValue("user_id")
-		log.Printf("Запрос от пользователя %s: %s", userID, text)
+		logger.Log.Infof("Запрос от пользователя %s: %s", userID, text)
 
 		args := strings.Fields(text)
 
 		if len(args) == 2 && args[0] == "results" {
 			pollID := args[1]
-			log.Printf("Пользователь %s запросил результаты голосования %s", userID, pollID)
+			logger.Log.Infof("Пользователь %s запросил результаты голосования %s", userID, pollID)
 			resultText, err := service.GetResults(pollID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -40,7 +40,7 @@ func Handler(service *poll.PollService) http.HandlerFunc {
 
 		if len(args) == 2 && args[0] == "close" {
 			pollID := args[1]
-			log.Printf("Пользователь %s хочет завершить голосование %s", userID, pollID)
+			logger.Log.Infof("Пользователь %s хочет завершить голосование %s", userID, pollID)
 			err := service.ClosePoll(pollID, userID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -54,7 +54,7 @@ func Handler(service *poll.PollService) http.HandlerFunc {
 
 		if len(args) == 2 && args[0] == "delete" {
 			pollID := args[1]
-			log.Printf("Пользователь %s хочет удалить голосование %s", userID, pollID)
+			logger.Log.Infof("Пользователь %s хочет удалить голосование %s", userID, pollID)
 			err := service.DeletePoll(pollID, userID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -69,7 +69,7 @@ func Handler(service *poll.PollService) http.HandlerFunc {
 		if len(args) == 2 {
 			pollID := args[0]
 			optionID := args[1]
-			log.Printf("Пользователь %s голосует за %s в голосовании %s", userID, optionID, pollID)
+			logger.Log.Infof("Пользователь %s голосует за %s в голосовании %s", userID, optionID, pollID)
 			err = service.Vote(pollID, optionID, userID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -105,7 +105,7 @@ func Handler(service *poll.PollService) http.HandlerFunc {
 			msg += fmt.Sprintf("- [%s] %s\n", id[:6], opt)
 		}
 
-		log.Printf("Голосование %s создано пользователем %s", p.ID, userID)
+		logger.Log.Infof("Голосование %s создано пользователем %s", p.ID, userID)
 
 		resp := map[string]string{"response_type": "in_channel", "text": msg}
 		w.Header().Set("Content-Type", "application/json")

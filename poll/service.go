@@ -2,7 +2,7 @@ package poll
 
 import (
 	"fmt"
-	"log"
+	"vk_bot/logger"
 
 	"github.com/google/uuid"
 )
@@ -43,7 +43,7 @@ func (s *PollService) CreatePoll(question string, options []string, userID strin
 		return nil, err
 	}
 
-	log.Printf("Создано голосование: %s от пользователя %s", id, userID)
+	logger.Log.Infof("Создано голосование: %s от пользователя %s", id, userID)
 	return poll, nil
 }
 
@@ -61,7 +61,7 @@ func (s *PollService) Vote(pollID, optionID, userID string) error {
 	}
 
 	poll.Votes[userID] = optionID
-	log.Printf("Пользователь %s проголосовал за %s в голосовании %s", userID, optionID, pollID)
+	logger.Log.Infof("Пользователь %s проголосовал за %s в голосовании %s", userID, optionID, pollID)
 	return s.storage.SavePoll(poll)
 }
 
@@ -81,7 +81,7 @@ func (s *PollService) GetResults(pollID string) (string, error) {
 		result += fmt.Sprintf("- %s: %d голос(ов)\n", text, counts[id])
 	}
 
-	log.Printf("Пользователь запросил результаты голосования %s", pollID)
+	logger.Log.Infof("Пользователь запросил результаты голосования %s", pollID)
 	return result, nil
 }
 
@@ -96,7 +96,7 @@ func (s *PollService) ClosePoll(pollID, userID string) error {
 	}
 
 	p.IsClosed = true
-	log.Printf("Пользователь %s завершил голосование %s", userID, pollID)
+	logger.Log.Infof("Пользователь %s завершил голосование %s", userID, pollID)
 	return s.storage.SavePoll(p)
 }
 
@@ -110,6 +110,6 @@ func (s *PollService) DeletePoll(pollID, userID string) error {
 		return fmt.Errorf("только создатель может удалить голосование")
 	}
 
-	log.Printf("Пользователь %s удалил голосование %s", userID, pollID)
+	logger.Log.Infof("Пользователь %s удалил голосование %s", userID, pollID)
 	return s.storage.DeletePoll(pollID)
 }
