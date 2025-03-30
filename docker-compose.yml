@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - tarantool
+    environment:
+      - TARANTOOL_HOST=tarantool
+      - TARANTOOL_PORT=3301
+
+  tarantool:
+    image: tarantool/tarantool
+    command: tarantool /opt/app/init.lua
+    volumes:
+      - ./tarantool:/opt/app
+    ports:
+      - "3301:3301"
